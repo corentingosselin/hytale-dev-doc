@@ -1,532 +1,133 @@
 # Commands
 
-Create custom commands for your Hytale plugin to allow players and administrators to interact with your plugin features.
+Create custom commands for your Hytale plugin using the server command system found in the decompiled sources.
 
 ## Command Registration
 
-Commands extend `CommandBase` and are registered in your plugin's `setup()` method.
-
-### Basic Command
+Commands extend `AbstractCommand` (most commonly `CommandBase` for sync commands) and are registered in your plugin's `setup()` method.
 
 ```java
-public class TestCommand extends CommandBase {
-    // Command implementation
+public class PingCommand extends CommandBase {
+    public PingCommand() {
+        // Second parameter is a description/translation key.
+        super("ping", "myplugin.commands.ping.desc");
+    }
+
+    @Override
+    protected void executeSync(@Nonnull CommandContext context) {
+        context.sendMessage(Message.raw("Pong!"));
+    }
 }
 
-// Register in setup()
 @Override
 protected void setup() {
-    getCommandRegistry().registerCommand(new TestCommand());
+    getCommandRegistry().registerCommand(new PingCommand());
 }
 ```
 
-### Alternative Registration
+`getCommandRegistry().registerCommand(...)` wires the command owner to your plugin. Use `CommandManager.get().registerSystemCommand(...)` only for system-level commands.
+
+## Arguments
+
+Commands define arguments with `withRequiredArg`, `withOptionalArg`, `withDefaultArg`, and `withFlagArg`. Argument values are read from `CommandContext`.
 
 ```java
-// Using CommandManager
-CommandManager.get().register(new TestCommand());
-```
+public class EchoCommand extends CommandBase {
+    private final RequiredArg<String> textArg =
+        this.withRequiredArg("text", "myplugin.commands.echo.text", ArgTypes.STRING);
+    private final DefaultArg<Integer> timesArg =
+        this.withDefaultArg("times", "myplugin.commands.echo.times", ArgTypes.INTEGER, 1, "1");
 
-## Command Features
-
-### Automatic Help Integration
-
-Commands automatically appear in `/help` when registered:
-
-```java
-getCommandRegistry().registerCommand(new MyCommand());
-// Now players can see it in /help
-```
-
-### Console Execution
-
-Commands can be executed from the server console as well as by players.
-
-### Permission-Based Restrictions
-
-Commands support permission checks to restrict access.
-
-## Built-in Commands
-
-Hytale includes several built-in commands:
-
-### Whitelist Commands
-```bash
-/whitelist add <name>    # Add player to whitelist
-/whitelist remove <name> # Remove from whitelist
-/whitelist list          # List whitelisted players
-```
-
-### Authentication Commands
-```bash
-/auth login device       # Authenticate with device
-/auth status             # Check authentication status
-/auth persistence <Encryption|Memory>  # Set auth persistence
-/auth insecure           # Disable authentication (development only)
-```
-
-### Expected Basic Commands
-
-These commands are expected to be implemented by plugins:
-
-```bash
-/spawn          # Teleport to spawn
-/sethome        # Set home location
-/home           # Teleport to home
-/warp <name>    # Teleport to warp
-/tpa <player>   # Request teleport to player
-```
-
-## Command Examples
-
-### Simple Teleport Command
-
-```java
-public class SpawnCommand extends CommandBase {
-
-    @Override
-    public String getName() {
-        return "spawn";
+    public EchoCommand() {
+        super("echo", "myplugin.commands.echo.desc");
     }
 
     @Override
-    public String getDescription() {
-        return "Teleport to spawn";
-    }
-
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command");
-            return;
+    protected void executeSync(@Nonnull CommandContext context) {
+        String text = textArg.get(context);
+        int times = timesArg.get(context);
+        for (int i = 0; i < times; i++) {
+            context.sendMessage(Message.raw(text));
         }
-
-        Player player = (Player) sender;
-        Location spawn = getSpawnLocation();
-        player.teleport(spawn);
-        player.sendMessage(Message.raw("Teleported to spawn!"));
     }
 }
 ```
 
-### Home Command with Arguments
+Use `ArgTypes` to pick the built-in argument parsers (strings, numbers, players, worlds, assets, and more).
+
+## Sender Handling
+
+`CommandContext` provides the sender and helper methods for sender checks.
 
 ```java
-public class HomeCommand extends CommandBase {
-
-    @Override
-    public String getName() {
-        return "home";
-    }
-
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command");
-            return;
-        }
-
-        Player player = (Player) sender;
-
-        // Optional home name argument
-        String homeName = args.length > 0 ? args[0] : "default";
-
-        Location home = getPlayerHome(player, homeName);
-
-        if (home == null) {
-            player.sendMessage(Message.raw("Home '" + homeName + "' not found"));
-            return;
-        }
-
-        player.teleport(home);
-        player.sendMessage(Message.raw("Teleported to home: " + homeName));
-    }
+if (!context.isPlayer()) {
+    context.sendMessage(Message.raw("Players only."));
+    return;
 }
-```
 
-### Admin Command with Permissions
-
-```java
-public class ReloadCommand extends CommandBase {
-
-    @Override
-    public String getName() {
-        return "reload";
-    }
-
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        // Check permission
-        if (!sender.hasPermission("myplugin.reload")) {
-            sender.sendMessage("You don't have permission to use this command");
-            return;
-        }
-
-        // Reload plugin config
-        reloadConfig();
-
-        sender.sendMessage(Message.raw("Plugin reloaded!"));
-    }
-}
-```
-
-## Command Structure
-
-### CommandBase Methods
-
-```java
-public abstract class CommandBase {
-    // Get command name
-    public abstract String getName();
-
-    // Get command description (for /help)
-    public String getDescription();
-
-    // Get command usage
-    public String getUsage();
-
-    // Get command aliases
-    public List\<String\> getAliases();
-
-    // Execute command
-    public abstract void execute(CommandSender sender, String[] args);
-
-    // Tab completion
-    public List\<String\> tabComplete(CommandSender sender, String[] args);
-}
-```
-
-### Full Command Example
-
-```java
-public class WarpCommand extends CommandBase {
-
-    private final Map\<String, Location\> warps = new HashMap\<>();
-
-    @Override
-    public String getName() {
-        return "warp";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Teleport to a warp location";
-    }
-
-    @Override
-    public String getUsage() {
-        return "/warp \<name\>";
-    }
-
-    @Override
-    public List\<String\> getAliases() {
-        return Arrays.asList("tp", "teleport");
-    }
-
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command");
-            return;
-        }
-
-        if (args.length == 0) {
-            sender.sendMessage(Message.raw("Usage: " + getUsage()));
-            sender.sendMessage(Message.raw("Available warps: " +
-                String.join(", ", warps.keySet())));
-            return;
-        }
-
-        Player player = (Player) sender;
-        String warpName = args[0];
-
-        Location warp = warps.get(warpName.toLowerCase());
-
-        if (warp == null) {
-            player.sendMessage(Message.raw("Warp '" + warpName + "' not found"));
-            return;
-        }
-
-        player.teleport(warp);
-        player.sendMessage(Message.raw("Teleported to warp: " + warpName));
-    }
-
-    @Override
-    public List\<String\> tabComplete(CommandSender sender, String[] args) {
-        if (args.length == 1) {
-            // Return warp names for tab completion
-            return new ArrayList\<\>(warps.keySet());
-        }
-        return Collections.emptyList();
-    }
-}
-```
-
-## Command Sender Types
-
-### Player Sender
-
-```java
-if (sender instanceof Player) {
-    Player player = (Player) sender;
-    // Player-specific code
-}
-```
-
-### Console Sender
-
-```java
-if (sender instanceof ConsoleSender) {
-    // Console-specific code
-    sender.sendMessage("Command executed from console");
-}
-```
-
-### Generic Sender
-
-```java
-// Works for both players and console
-sender.sendMessage("This works for everyone");
-```
-
-## Tab Completion
-
-Provide tab completion for better user experience:
-
-```java
-@Override
-public List\<String\> tabComplete(CommandSender sender, String[] args) {
-    if (args.length == 1) {
-        // Complete first argument
-        return Arrays.asList("create", "delete", "list");
-    }
-
-    if (args.length == 2 && args[0].equals("delete")) {
-        // Complete second argument for delete command
-        return getWarpNames();
-    }
-
-    return Collections.emptyList();
-}
+Player player = context.senderAs(Player.class);
 ```
 
 ## Sub-Commands
 
-Create complex commands with sub-commands:
+Use `AbstractCommandCollection` for subcommands.
 
 ```java
-public class WarpAdminCommand extends CommandBase {
-
-    @Override
-    public String getName() {
-        return "warpadmin";
-    }
-
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (args.length == 0) {
-            sender.sendMessage("Usage: /warpadmin \<create|delete|list\>");
-            return;
-        }
-
-        String subCommand = args[0].toLowerCase();
-
-        switch (subCommand) {
-            case "create":
-                handleCreate(sender, args);
-                break;
-            case "delete":
-                handleDelete(sender, args);
-                break;
-            case "list":
-                handleList(sender);
-                break;
-            default:
-                sender.sendMessage("Unknown sub-command: " + subCommand);
-        }
-    }
-
-    private void handleCreate(CommandSender sender, String[] args) {
-        // Handle create logic
-    }
-
-    private void handleDelete(CommandSender sender, String[] args) {
-        // Handle delete logic
-    }
-
-    private void handleList(CommandSender sender) {
-        // Handle list logic
+public class WarpCommand extends AbstractCommandCollection {
+    public WarpCommand() {
+        super("warp", "myplugin.commands.warp.desc");
+        this.addSubCommand(new WarpSetCommand());
+        this.addSubCommand(new WarpGoCommand());
     }
 }
-```
 
-## Async Command Execution
-
-For commands that do heavy operations:
-
-```java
-@Override
-public void execute(CommandSender sender, String[] args) {
-    sender.sendMessage("Processing...");
-
-    CompletableFuture.runAsync(() -> {
-        // Heavy operation (database query, file I/O, etc.)
-        Result result = performHeavyOperation();
-
-        // Send result back to player
-        sender.sendMessage(Message.raw("Result: " + result));
-    });
-}
-```
-
-## Command Cooldowns
-
-Implement cooldowns to prevent spam:
-
-```java
-public class TpaCommand extends CommandBase {
-
-    private final Map\<UUID, Long\> cooldowns = new HashMap\<>();
-    private static final long COOLDOWN_MS = 5000; // 5 seconds
-
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) return;
-
-        Player player = (Player) sender;
-        UUID uuid = player.getUuid();
-
-        // Check cooldown
-        if (cooldowns.containsKey(uuid)) {
-            long lastUse = cooldowns.get(uuid);
-            long now = System.currentTimeMillis();
-
-            if (now - lastUse < COOLDOWN_MS) {
-                long remaining = (COOLDOWN_MS - (now - lastUse)) / 1000;
-                player.sendMessage(Message.raw("Please wait " + remaining + " seconds"));
-                return;
-            }
-        }
-
-        // Execute command logic
-        executeTpa(player, args);
-
-        // Update cooldown
-        cooldowns.put(uuid, System.currentTimeMillis());
-    }
-}
-```
-
-## Configuration Reload Commands
-
-Implement config reload for live updates:
-
-```java
-public class ReloadCommand extends CommandBase {
-
-    @Override
-    public String getName() {
-        return "myreload";
+public class WarpSetCommand extends CommandBase {
+    public WarpSetCommand() {
+        super("set", "myplugin.commands.warp.set.desc");
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("myplugin.admin")) {
-            sender.sendMessage("No permission");
-            return;
-        }
-
-        try {
-            // Reload plugin configuration
-            getPlugin().reloadConfig();
-
-            // Reload warps, homes, etc.
-            getPlugin().reloadWarps();
-
-            sender.sendMessage(Message.raw("✓ Configuration reloaded"));
-        } catch (Exception e) {
-            sender.sendMessage(Message.raw("✗ Error reloading: " + e.getMessage()));
-        }
+    protected void executeSync(@Nonnull CommandContext context) {
+        context.sendMessage(Message.raw("Warp set."));
     }
 }
 ```
 
-## Command Best Practices
+## Async Commands
 
-### 1. Always Validate Arguments
+For long-running work, extend `AbstractAsyncCommand` and return a `CompletableFuture`.
 
 ```java
-if (args.length < requiredArgs) {
-    sender.sendMessage(Message.raw("Usage: " + getUsage()));
-    return;
+public class ExportCommand extends AbstractAsyncCommand {
+    public ExportCommand() {
+        super("export", "myplugin.commands.export.desc");
+    }
+
+    @Override
+    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext context) {
+        return runAsync(context, () -> {
+            // Heavy work (file I/O, DB, etc.)
+            context.sendMessage(Message.raw("Export complete."));
+        }, MyPlugin.getExecutor());
+    }
 }
 ```
 
-### 2. Check Permissions Early
+## Built-in Commands
 
-```java
-if (!sender.hasPermission("myplugin.command")) {
-    sender.sendMessage("No permission");
-    return;
-}
-```
-
-### 3. Provide Clear Feedback
-
-```java
-// ✓ Good
-player.sendMessage(Message.raw("✓ Warp created: spawn"));
-
-// ✗ Bad
-player.sendMessage(Message.raw("done"));
-```
-
-### 4. Handle Edge Cases
-
-```java
-// Check if player is online
-Player target = getPlayer(args[0]);
-if (target == null) {
-    sender.sendMessage(Message.raw("Player not found or offline"));
-    return;
-}
-```
-
-### 5. Use Async for Heavy Operations
-
-```java
-CompletableFuture.runAsync(() -> {
-    // Database query, file I/O, web request
-}).thenAccept(result -> {
-    sender.sendMessage(Message.raw("Complete!"));
-});
-```
-
-## Community Examples
-
-### TPA Plugin Example
-
-From Discord discussions, here's a TPA (teleport request) command pattern:
-
-```java
-// /tpa \<player\> - Request to teleport to player
-// /tpaccept - Accept teleport request
-// /tpdeny - Deny teleport request
-```
-
-See [FireMario211/Tpa](https://github.com/FireMario211/Tpa) for a complete implementation.
+System commands are registered in `CommandManager.registerCommands()` and by builtin plugins via `registerSystemCommand(...)`. Refer to the decompiled sources for the authoritative list in your build.
 
 ## Common Issues
 
 | Issue | Solution |
 |-------|----------|
-| Command not appearing in /help | Ensure it's registered in setup() |
-| Command works for players but not console | Check instanceof Player before casting |
-| Tab completion not working | Implement tabComplete() method |
-| Permission check not working | Verify permission node is correct |
+| Command not appearing in help | Ensure `setup()` registers the command with `getCommandRegistry()` |
+| `SenderTypeException` | Guard with `context.isPlayer()` or catch the exception |
+| Optional arg is null | Use `withDefaultArg(...)` or check for `null` |
+| Suggestions not shown | Use `Argument.suggest(...)` or a supported `ArgTypes` parser |
 
 ## Next Steps
 
-- [Permissions](/plugin-development/permissions) - Set up permission systems
+- [Permissions](/plugin-development/permissions) - Access control patterns
 - [Configuration](/plugin-development/configuration) - Store command settings
 - [Complete Examples](/plugin-development/examples) - Full plugin examples with commands
