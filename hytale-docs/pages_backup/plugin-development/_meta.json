@@ -1,0 +1,9 @@
+{
+  "index": "Overview",
+  "getting-started": "Getting Started",
+  "event-system": "Event System",
+  "player-data": "Player Data & Entities",
+  "ecs-patterns": "ECS Patterns",
+  "configuration": "Configuration & Persistence",
+  "examples": "Example Plugins"
+}

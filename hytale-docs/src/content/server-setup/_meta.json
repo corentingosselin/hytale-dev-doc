@@ -1,0 +1,9 @@
+{
+  "index": "Overview",
+  "installation": "Installation",
+  "configuration": "Configuration",
+  "port-forwarding": "Port Forwarding",
+  "networking": "Networking & Transfer Packets",
+  "hosting-providers": "Hosting Providers",
+  "performance-tuning": "Performance Tuning"
+}

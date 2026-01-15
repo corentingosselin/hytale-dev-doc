@@ -1,0 +1,151 @@
+# ===========================================
+# Hytale Dev Documentation - .gitignore
+# ===========================================
+
+# -------------------------------------------
+# Sensitive/Large Source Files (DO NOT COMMIT)
+# -------------------------------------------
+
+# Decompiled Hytale source code (copyrighted)
+hytale-decompiled/
+
+# Discord message exports (private community data)
+discord-hytale-messages*.txt
+*.discord.txt
+
+# -------------------------------------------
+# macOS System Files
+# -------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# -------------------------------------------
+# IDE and Editor Files
+# -------------------------------------------
+
+# JetBrains IDEs (IntelliJ, WebStorm, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.settings/
+*.launch
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# -------------------------------------------
+# Node.js / Next.js
+# -------------------------------------------
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Package manager lock files (optional - some prefer to commit these)
+# Uncomment if you want to ignore:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# NPM debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# -------------------------------------------
+# Build Outputs
+# -------------------------------------------
+*.jar
+*.war
+*.ear
+*.class
+target/
+
+# -------------------------------------------
+# Environment & Secrets
+# -------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+.envrc
+
+# API keys, credentials
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# -------------------------------------------
+# Logs and Temporary Files
+# -------------------------------------------
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+
+# -------------------------------------------
+# Claude Code
+# -------------------------------------------
+.claude/
+
+# -------------------------------------------
+# Nextra / Documentation Build
+# -------------------------------------------
+.contentlayer/
+.turbo/
+
+# -------------------------------------------
+# Testing
+# -------------------------------------------
+coverage/
+.nyc_output/
+
+# -------------------------------------------
+# Misc
+# -------------------------------------------
+
+# Thumbnails
+Thumbs.db
+ehthumbs.db
+
+# Archives (shouldn't be in repo)
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# App folder (if not needed)
+app/

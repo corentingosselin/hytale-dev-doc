@@ -1,0 +1,13 @@
+{
+  "index": "Overview",
+  "getting-started": "Getting Started",
+  "event-system": "Event System",
+  "commands": "Commands",
+  "ecs-architecture": "ECS Architecture",
+  "player-data": "Player Data & Entities",
+  "custom-ui": "Custom UI",
+  "configuration": "Configuration",
+  "permissions": "Permissions",
+  "lifecycle": "Plugin Lifecycle",
+  "examples": "Complete Examples"
+}
