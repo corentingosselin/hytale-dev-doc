@@ -147,5 +147,5 @@ ehthumbs.db
 *.backup
 *~
 
-# App folder (if not needed)
-app/
+# Root app folder (not used - actual app is in hytale-docs/src/app)
+/app/
