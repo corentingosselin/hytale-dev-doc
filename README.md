@@ -37,7 +37,7 @@ Visit the documentation site: **[Coming Soon]**
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/hytale-dev-doc.git
+git clone https://github.com/corentingosselin/hytale-dev-doc.git
 cd hytale-dev-doc
 
 # Navigate to docs folder
