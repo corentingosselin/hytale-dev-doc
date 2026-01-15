@@ -2,6 +2,25 @@
 
 Hytale introduces a revolutionary approach to server networking with built-in transfer packets, eliminating the need for traditional proxy servers like BungeeCord or Velocity.
 
+## Network Protocol
+
+Hytale uses **QUIC** (Quick UDP Internet Connections) as its transport protocol, which runs over **UDP** on port 5520 by default.
+
+> "We are targeting shipping the server for Java 25 and QUIC as the transport for the protocol." - Silkey (Tech Director)
+
+**QUIC Benefits:**
+- Built-in encryption (TLS 1.3)
+- Faster connection establishment
+- Better handling of packet loss
+- Multiplexed streams without head-of-line blocking
+- Connection migration (handles IP changes)
+
+**Technical Details from Decompiled Code:**
+- Uses Netty's QUIC codec (incubator)
+- Zstd compression for packet payloads
+- VarInt encoding for variable-length fields
+- Max payload size: configurable (default ~1.6GB theoretical max)
+
 ## Transfer Packets
 
 Transfer packets allow players to seamlessly move between servers while carrying data. This is a native Hytale feature that replaces proxy-based architectures.
@@ -172,8 +191,8 @@ Based on community experience:
 
 **Linux (UFW):**
 ```bash
-# Allow Hytale port
-sudo ufw allow 5520/tcp
+# Allow Hytale port (UDP for QUIC protocol)
+sudo ufw allow 5520/udp
 
 # Block everything else by default
 sudo ufw default deny incoming
@@ -185,8 +204,8 @@ sudo ufw enable
 
 **iptables:**
 ```bash
-# Allow Hytale port
-iptables -A INPUT -p tcp --dport 5520 -j ACCEPT
+# Allow Hytale port (UDP for QUIC)
+iptables -A INPUT -p udp --dport 5520 -j ACCEPT
 
 # Drop other incoming traffic (be careful!)
 iptables -A INPUT -j DROP
@@ -243,7 +262,7 @@ Internet → DDoS Filter (TCPShield/etc) → Your Server
 
 | Port | Protocol | Purpose |
 |------|----------|---------|
-| 5520 | TCP | Default Hytale game port |
+| 5520 | UDP | Default Hytale game port (QUIC protocol) |
 
 ### Port Forwarding
 

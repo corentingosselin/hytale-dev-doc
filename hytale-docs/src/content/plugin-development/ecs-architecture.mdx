@@ -9,7 +9,11 @@ ECS is a design pattern that separates:
 - **Components** - Data holders attached to entities
 - **Systems** - Logic that operates on entities with specific components
 
-> "It is our own. Custom for Hytale but meant to be less complex than other highly optimized ECS solutions." - Slikey (Tech Director)
+> "It is our own. Custom for Hytale but meant to be less complex than other highly optimized ECS solutions." - Silkey (Tech Director)
+
+**Important:** The Java/Legacy server uses a custom ECS implementation developed by Hytale. This is different from FLECS, which was only used in the C++ engine rewrite that was eventually abandoned.
+
+> "Silkey was here a few days ago and I asked him about it, he said the java version had their own custom ECS system they developed (so not flecs like they used in the new engine)" - Discord community
 
 ## Why ECS?
 
@@ -85,18 +89,33 @@ Ref<EntityStore> entityRef = event.getPlayerRef();
 
 ### 2. Components
 
-Components are pure data structures:
+Components are pure data structures. From the decompiled code, components implement the `Component<ECS_TYPE>` interface with clone methods for serialization.
 
-**Built-in Components:**
+**Built-in Components (from decompiled code):**
 - `Player` - Player-specific data
 - `PlayerRef` - Player reference
-- `Transform` - Position, rotation, scale
-- `Health` - Health points
-- `Combat` - Combat-related data
+- `Transform` / `ModelTransform` - Position, rotation, scale (52 bytes)
+- `UUIDComponent` - UUID identity
+- `EffectControllerComponent` - Active effects
+- `MovementStatesComponent` - Movement state machine
+- `KnockbackComponent` - Physics/knockback
+- `DamageDataComponent` - Damage tracking
+- `ProjectileComponent` - Projectile properties
+- `UniqueItemUsagesComponent` - Item tracking
 - `Container` - Inventory/storage
 
+**ComponentUpdateType enum (25 types):**
+- Nameplate, UIComponents, CombatText
+- Model, PlayerSkin, Item, Block
+- Equipment, EntityStats, Transform
+- MovementStates, EntityEffects, Interactions
+- DynamicLight, Interactable, Intangible
+- Invulnerable, RespondToHit, HitboxCollision
+- Repulsion, Prediction, Audio, Mounted
+- NewSpawn, ActiveAnimations
+
 **Custom Components:**
-> "You can register a new component on those container entities" - Slikey
+> "You can register a new component on those container entities" - Silkey
 
 ### 3. Systems
 
@@ -230,7 +249,15 @@ for (int i = 0; i < chunk.size(); i++) {
 
 ## Store (Component Storage)
 
-The Store holds all components for all entities:
+The Store is the main ECS database that holds all components for all entities. From the decompiled code:
+
+**Store Features:**
+- Manages entities (refs, archetypes, components)
+- Supports parallel processing via `ParallelTask`
+- Resource storage for singleton resources
+- Command buffer for batched operations
+- Metric collection per system
+- Entity count limit: up to 4,096,000 entities per `EntityUpdates` packet
 
 ```java
 Store<EntityStore> store = entityRef.getStore();

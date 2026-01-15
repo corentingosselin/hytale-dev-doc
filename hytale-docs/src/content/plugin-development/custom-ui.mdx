@@ -383,6 +383,20 @@ Available `HudComponent` values:
 - `Speedometer`, `AmmoIndicator`
 - And more...
 
+## UI Technology
+
+Based on Discord discussions and code analysis, Hytale's UI system uses **NoesisGUI**, an industry-standard C++ UI framework:
+
+> "NoesisGUI: C++ Game UI Framework... It has a C# SDK but it's an industry standard UI framework" - Discord community
+
+**NoesisGUI Features:**
+- XAML-based UI definitions
+- GPU-accelerated rendering
+- C# SDK integration (client-side)
+- Server sends UI commands via BSON
+
+This explains why UI files use BSON documents - the server describes the UI declaratively, and the NoesisGUI client renders it.
+
 ## .ui File Format
 
 UI layouts are BSON documents. The exact format is not fully documented, but based on decompiled code:

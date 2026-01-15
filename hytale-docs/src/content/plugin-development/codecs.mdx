@@ -4,13 +4,31 @@ Hytale uses a codec system for serialization and deserialization of game data. U
 
 ## What are Codecs?
 
-Codecs are bidirectional converters that transform Java objects to/from JSON (or other formats). They're used throughout Hytale for:
+Codecs are bidirectional converters that transform Java objects to/from BSON (Binary JSON) or other formats. They're used throughout Hytale for:
 
 - Configuration files
 - Asset definitions
 - Custom interactions
-- Network serialization
+- Network serialization (with Zstd compression)
 - Data persistence
+
+**From Decompiled Code - Codec Architecture:**
+```
+Codec<T> - Generic serialization interface
+├─ PrimitiveCodec (built-in types)
+├─ KeyedCodec (named field codec)
+├─ BuilderCodec (fluent builder)
+├─ DirectDecodeCodec
+├─ RawJsonCodec/RawJsonInheritCodec
+├─ DocumentContainingCodec (BSON support)
+└─ Schema validation
+```
+
+**Technical Notes:**
+- Primary format is BSON (Binary JSON), not plain JSON
+- Network packets use Zstd compression
+- Config files typically use `.json` extension but are BSON-compatible
+- Supports schema-based validation
 
 ## BuilderCodec Basics
 

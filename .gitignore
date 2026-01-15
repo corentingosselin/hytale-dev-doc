@@ -116,6 +116,7 @@ temp/
 # Claude Code
 # -------------------------------------------
 .claude/
+CLAUDE.MD
 
 # -------------------------------------------
 # Nextra / Documentation Build

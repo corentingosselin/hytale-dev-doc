@@ -6,9 +6,11 @@ To allow players to connect to your Hytale server, you need to properly configur
 
 **Port 5520** is the default port used by Hytale servers.
 
-- **Protocol**: TCP
+- **Protocol**: UDP (QUIC)
 - **Default Port**: 5520
 - **Must be open**: For both inbound and outbound traffic
+
+> "The server will need to be authenticated to a Hytale account that owns the game. The .jar will be downloadable either via the Launcher, or via a standalone 'hytale-downloader' cli tool" - Community info
 
 ## Port Forwarding Steps
 
@@ -45,7 +47,7 @@ In your router's settings:
    - **External Port**: 5520
    - **Internal Port**: 5520
    - **Internal IP**: Your computer's local IP
-   - **Protocol**: TCP (or TCP/UDP)
+   - **Protocol**: UDP (important: Hytale uses QUIC over UDP, not TCP!)
 3. Save and apply changes
 
 ### 4. Test Your Connection
@@ -61,11 +63,11 @@ Use a port checker tool:
 
 **Solution 1: Firewall**
 ```bash
-# Windows - Allow through firewall
-netsh advfirewall firewall add rule name="Hytale Server" dir=in action=allow protocol=TCP localport=5520
+# Windows - Allow through firewall (UDP for QUIC)
+netsh advfirewall firewall add rule name="Hytale Server" dir=in action=allow protocol=UDP localport=5520
 
 # Linux - UFW
-sudo ufw allow 5520/tcp
+sudo ufw allow 5520/udp
 
 # macOS - System Preferences
 # Security & Privacy > Firewall > Firewall Options > Add Application
@@ -129,12 +131,12 @@ If you're using a VPS or dedicated server:
 **Most providers require explicit firewall rules:**
 
 ```bash
-# Example: UFW (Ubuntu)
-sudo ufw allow 5520/tcp
+# Example: UFW (Ubuntu) - Note: UDP for QUIC protocol
+sudo ufw allow 5520/udp
 sudo ufw reload
 
 # Example: iptables
-sudo iptables -A INPUT -p tcp --dport 5520 -j ACCEPT
+sudo iptables -A INPUT -p udp --dport 5520 -j ACCEPT
 sudo iptables-save
 ```
 
