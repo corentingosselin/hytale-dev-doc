@@ -70,6 +70,62 @@ Troubleshooting guide based on real problems and solutions from the Hytale devel
 - Check Hytale status page or Discord for service updates
 - Use `/auth insecure` for LAN testing only (not recommended for public servers)
 
+## Thread & Component Errors
+
+### "Assert not in thread!" Error
+
+**Problem**: When accessing entity components, you get:
+```
+java.lang.IllegalStateException: Assert not in thread!
+Thread[#108,WorldThread - default,5,InnocuousForkJoinWorkerThreadGroup]
+but was in Thread[#75,Scheduler,5,main]
+```
+
+**Cause**: You're trying to access ECS components from the wrong thread. Component operations must run on the world thread.
+
+**Solutions**:
+
+1. **For Commands**: Use `AbstractPlayerCommand` instead of `CommandBase`
+   ```java
+   // WRONG - CommandBase runs on scheduler thread
+   public class MyCommand extends CommandBase {
+       protected void executeSync(CommandContext context) {
+           // This crashes!
+           store.getComponent(ref, CustomComponent.getComponentType());
+       }
+   }
+
+   // CORRECT - AbstractPlayerCommand provides thread-safe context
+   public class MyCommand extends AbstractPlayerCommand {
+       protected void execute(Ref<EntityStore> ref, Store<EntityStore> store, CommandContext ctx) {
+           // Safe - runs on world thread
+           store.getComponent(ref, CustomComponent.getComponentType());
+       }
+   }
+   ```
+
+2. **For Async Events**: Use `world.execute()` to schedule on world thread
+   ```java
+   world.execute(() -> {
+       // Safe to access components here
+       CustomComponent component = store.getComponent(ref, CustomComponent.getComponentType());
+   });
+   ```
+
+3. **For Event Systems**: Use `EntityEventSystem` which handles threading automatically
+
+See [Thread Safety Guide](/plugin-development/thread-safety) for detailed patterns.
+
+### Component Returns Null Unexpectedly
+
+**Problem**: `store.getComponent()` returns null even though the entity should have the component.
+
+**Solutions**:
+1. Verify you're using the correct `ComponentType` (e.g., `Player.getComponentType()`)
+2. Check if you're on the correct thread (see above)
+3. Ensure the entity still exists and hasn't been destroyed
+4. For custom components, verify registration in `setup()`
+
 ## Plugin Issues
 
 ### Plugin Not Loading
@@ -200,6 +256,45 @@ From Discord:
 
 **Alternative**: Use development server that auto-restarts on changes.
 
+### ZipException on Plugin Reload
+
+**Problem**: After executing `/plugin reload <pluginId>`, you get:
+```
+java.util.zip.ZipException: ZipFile invalid LOC header (bad signature)
+```
+
+**Cause**: The plugin JAR file was modified while the server was running, corrupting the file handle.
+
+**Solution**: Hot-reload is currently broken for most cases. Always:
+1. Stop the server completely
+2. Replace the plugin JAR
+3. Start the server fresh
+
+There is no working hot-reload for plugins at this time. Use external tools like HotSwap for code changes during development.
+
+### "Cannot resolve symbol 'hypixel'" Error
+
+**Problem**: IDE shows `Cannot resolve symbol 'hypixel'` or similar import errors.
+
+**Causes & Solutions**:
+
+1. **Missing HytaleServer.jar dependency**
+   ```kotlin
+   // build.gradle.kts
+   dependencies {
+       compileOnly(files("libs/HytaleServer.jar"))
+   }
+   ```
+
+2. **Java Version Mismatch**
+   - Ensure you're using Java 25 (not 21 or earlier)
+   - Check IDE project SDK settings
+   - Verify `sourceCompatibility` and `targetCompatibility` in build.gradle
+
+3. **IDE Cache Issues**
+   - IntelliJ: File > Invalidate Caches > Invalidate and Restart
+   - Reimport Gradle project
+
 ## Performance Issues
 
 ### High RAM Usage
@@ -261,6 +356,67 @@ From Discord:
    - SSD/NVMe for disk I/O
 
 ## Authentication & Security
+
+### OAuth2 Device Flow Errors
+
+**Problem**: When running `/auth login device`, you get:
+```
+Device authorization request failed
+```
+
+**Cause**: The device flow may be blocked or have connectivity issues.
+
+**Solutions**:
+1. **Use browser authentication instead**:
+   ```
+   /auth login browser
+   ```
+
+2. **After successful login, persist credentials**:
+   ```
+   /auth persistence encrypted
+   ```
+
+3. **Check for clock sync issues**: Ensure your server's system clock is accurate. Outdated time can cause token validation failures.
+
+### "Cannot save credentials" Warning
+
+**Problem**: Server logs show:
+```
+[EncryptedAuthCredentialStore] Cannot save credentials - no encryption key available
+```
+
+**Solutions**:
+1. Run `/auth persistence encrypted` to set up encrypted storage
+2. Ensure the server has write permissions to its config directory
+3. For development, you can use `/auth insecure` (not recommended for production)
+
+### Player Token/Authentication Issues
+
+**Problem**: Players get kicked or can't join due to token issues.
+
+**Solutions**:
+
+1. **Clock Sync Issue**: Player's PC clock may be wrong
+   - Have player check and update their system time
+   - This has fixed issues for multiple community members
+
+2. **Token Refresh**: Try having the player:
+   - Close the game completely
+   - Restart the Hytale launcher
+   - Rejoin the server
+
+3. **DNS Issues**: Try flushing DNS
+   ```bash
+   # Windows
+   ipconfig /flushdns
+
+   # macOS
+   sudo dscacheutil -flushcache
+
+   # Linux
+   sudo systemd-resolve --flush-caches
+   ```
 
 ### Authentication Errors
 

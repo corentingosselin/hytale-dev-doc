@@ -426,11 +426,60 @@ From Discord discussions about custom UI:
 
 > "The server will probably send JSON data describing the UI and callback events for things like clicking on buttons" - Technical speculation (confirmed by decompiled code showing BSON commands)
 
+## Known Limitations
+
+Based on Discord community feedback, be aware of these limitations:
+
+### CustomUIHud Limitations
+
+> "Hey were you able to make an uninteractable hud at all? Been trying unsuccesfully" - Discord
+
+1. **One Custom HUD Per Player Per Plugin**: You can only have one `CustomUIHud` active per player at a time. Multiple plugins can have their own HUDs.
+
+2. **HUD Makes Player Static**: When a custom HUD is shown via certain methods, the player may become unable to move until they press ESC.
+
+3. **File Path Format**: Don't include "Hud/" prefix if your file is already in the Hud folder:
+   ```java
+   // WRONG - If file is at assets/myplugin/ui/Hud/myui.ui
+   builder.append("Hud/myui.ui");  // Might cause "could not find document" error
+
+   // CORRECT
+   builder.append("myui.ui");
+   ```
+
+4. **Hot Reload Not Supported**: Custom UI changes require a full server restart. The UI files are loaded at startup.
+
+### Page Popup Restrictions
+
+> "Custom UI requires page popups (restricts interactivity)" - Discord
+
+- Custom UI pages are modal popups, not inline overlays
+- Players must dismiss the page to continue playing
+- For always-visible UI, use CustomUIHud instead
+
+### Cannot Extend Existing UI
+
+- You cannot modify or extend the built-in inventory UI
+- Cannot add custom slots to the vanilla inventory
+- Must create entirely custom pages/windows for custom inventory features
+
+### Server Restart Required
+
+> "Not gonna work here when you need to rebuild custom UI elements server needs full restart to load new ones" - Discord
+
+UI file changes are not hot-reloadable. After modifying .ui files:
+1. Stop the server
+2. Rebuild your plugin JAR
+3. Replace the JAR in the mods folder
+4. Start the server
+
 ### Known Issues (Early Access)
 
 Community members developing UI-heavy plugins have reported:
 
 > "The UI is invisible even with AlwaysOn: true" - UI rendering issues being investigated
+
+> "Says could not find document Hud/myui.ui for custom ui append command" - File path issues
 
 > "JAR Structure: Verified. manifest.json is at root, and assets/myplugin/interfaces.json + assets/myplugin/ui/my_ui.json are present" - Asset pack structure requirements
 

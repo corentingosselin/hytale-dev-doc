@@ -10,6 +10,7 @@
 hytale-decompiled/
 
 # Discord message exports (private community data)
+discord-context/
 discord-hytale-messages*.txt
 *.discord.txt
 

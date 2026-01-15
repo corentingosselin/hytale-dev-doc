@@ -284,6 +284,75 @@ Store<EntityStore> store = world.getEntityStore().getStore();
 TransformComponent transform = store.getComponent(playerRef, TransformComponent.getComponentType());
 ```
 
+## Async Event Registration Pitfalls
+
+Understanding the differences between registration methods is critical for avoiding bugs.
+
+### Registration Method Comparison
+
+| Method | Thread | Use Case |
+|--------|--------|----------|
+| `register()` | World thread | Sync events, component access safe |
+| `registerAsync()` | Async thread | Async events, NO direct component access |
+| `registerAsyncGlobal()` | Async thread | Async events, global (all worlds) |
+| `registerAsyncUnhandled()` | Async thread | Async events, for mods to extend |
+| `registerGlobal()` | World thread | Sync events, global (all worlds) |
+
+### Critical: Component Access in Async Events
+
+> "is it possible to retrieve components in async events? I always run into thread exception" - Discord
+
+When using `registerAsync()` or `registerAsyncGlobal()`, you **cannot** directly access ECS components:
+
+```java
+// WRONG - Will throw "Assert not in thread!" error
+getEventRegistry().registerAsyncGlobal(PlayerChatEvent.class, future -> {
+    future.thenAccept(event -> {
+        Player player = event.getPlayer();
+        World world = player.getWorld();
+        Store<EntityStore> store = player.getRef().getStore();
+
+        // THIS CRASHES - Wrong thread!
+        CustomComponent comp = store.getComponent(player.getRef(), CustomComponent.getComponentType());
+    });
+});
+
+// CORRECT - Use world.execute() to access components
+getEventRegistry().registerAsyncGlobal(PlayerChatEvent.class, future -> {
+    future.thenAccept(event -> {
+        Player player = event.getPlayer();
+        World world = player.getWorld();
+
+        // Schedule component access on world thread
+        world.execute(() -> {
+            Store<EntityStore> store = player.getRef().getStore();
+            CustomComponent comp = store.getComponent(player.getRef(), CustomComponent.getComponentType());
+            // Safe to use component now
+        });
+    });
+});
+```
+
+### registerAsyncGlobal vs registerAsync
+
+- `registerAsyncGlobal()` - Listens for events from ALL worlds
+- `registerAsync()` - Listens for events from a specific world context
+
+For most cases, use `registerAsyncGlobal()` for async events like `PlayerChatEvent`.
+
+### registerAsyncUnhandled
+
+Use `registerAsyncUnhandled()` when you want other mods to be able to intercept the event:
+
+```java
+// Allows other mods to process the event first
+getEventRegistry().registerAsyncUnhandled(PlayerChatEvent.class, future -> {
+    future.thenAccept(event -> {
+        // Your handling - runs after other handlers
+    });
+});
+```
+
 ## Important Notes from Community
 
 ### PlayerChatEvent is Asynchronous

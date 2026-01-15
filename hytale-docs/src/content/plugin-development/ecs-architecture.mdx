@@ -110,6 +110,44 @@ public class MySystem extends EntityEventSystem<EntityStore, MyEvent> {
 
 ## Working with ECS
 
+### Thread Safety: world.execute()
+
+**Critical**: Component operations must run on the correct world thread. If you're accessing components from async events, commands, or other contexts, use `world.execute()`:
+
+```java
+// WRONG - Accessing components from wrong thread causes crash
+getEventRegistry().registerAsync(SomeEvent.class, event -> {
+    Player player = store.getComponent(ref, Player.getComponentType()); // CRASH!
+});
+
+// CORRECT - Schedule on world thread
+getEventRegistry().registerAsync(SomeEvent.class, event -> {
+    Player player = event.getPlayer();
+    World world = player.getWorld();
+
+    world.execute(() -> {
+        // Safe to access components here
+        Ref<EntityStore> ref = player.getRef();
+        Store<EntityStore> store = ref.getStore();
+        CustomComponent comp = store.getComponent(ref, CustomComponent.getComponentType());
+    });
+});
+```
+
+**When you need `world.execute()`:**
+- Async event handlers
+- Commands using `CommandBase` (use `AbstractPlayerCommand` instead)
+- Scheduled tasks
+- CompletableFuture callbacks
+- Any code not already on the world thread
+
+**When you don't need it:**
+- `EntityEventSystem.handle()` - Already on world thread
+- `AbstractPlayerCommand.execute()` - Already handled
+- Sync event handlers - Already on world thread
+
+See [Thread Safety Guide](/plugin-development/thread-safety) for detailed patterns.
+
 ### Getting Components from Entities
 
 ```java

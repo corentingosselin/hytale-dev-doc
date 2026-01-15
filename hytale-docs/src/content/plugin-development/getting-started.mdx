@@ -6,10 +6,15 @@ Welcome to Hytale plugin development! This guide will help you create your first
 
 ### Required Tools
 
-- **Java Development Kit (JDK) 21+** - Hytale uses modern Java features
+- **Java Development Kit (JDK) 25** - Hytale requires Java 25 for full plugin support
 - **IntelliJ IDEA or Eclipse** - Recommended IDEs
 - **Gradle** - Build system (included in project)
 - **Git** - Version control
+- **HytaleServer.jar** - Required as compile dependency (no public Maven repo yet)
+
+> "why 21? it says 25 in the docs" - Common confusion from Discord. **Use Java 25.**
+
+See [Java Version Requirements](/getting-started/java-version) for installation instructions.
 
 ### Knowledge Requirements
 
@@ -46,37 +51,46 @@ tasks.shadowJar {
 
 ## Development Environment Setup
 
-### 1. Install JDK 21
+### 1. Install JDK 25
 
 **Windows:**
 ```bash
-# Download from Oracle or use Chocolatey
-choco install openjdk21
+# Download from Oracle or Adoptium
+# Or use Chocolatey
+choco install openjdk --version=25
 ```
 
 **Mac:**
 ```bash
 # Using Homebrew
-brew install openjdk@21
+brew install openjdk@25
+
+# Link it
+sudo ln -sfn /opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-25.jdk
 ```
 
 **Linux:**
 ```bash
 # Ubuntu/Debian
-sudo apt install openjdk-21-jdk
+sudo apt install openjdk-25-jdk
+
+# Or using SDKMAN (recommended for managing versions)
+sdk install java 25-open
 ```
+
+See [Java Version Requirements](/getting-started/java-version) for detailed installation guides.
 
 ### 2. Set Up IDE
 
 **IntelliJ IDEA (Recommended):**
 1. Download IntelliJ IDEA Community Edition
 2. Install Gradle plugin
-3. Configure JDK 21 in Project Structure
+3. Configure JDK 25 in Project Structure > SDKs
 
 **Eclipse:**
 1. Download Eclipse IDE for Java Developers
 2. Install Buildship Gradle plugin
-3. Configure JDK 21 in Installed JREs
+3. Configure JDK 25 in Installed JREs
 
 ### 3. Create Hytale Server
 
@@ -122,18 +136,17 @@ version = '1.0.0'
 
 repositories {
     mavenCentral()
-    // Hytale repository (when available)
-    maven { url 'https://repo.hytale.com/releases' }
+    // Note: No official Hytale Maven repository exists yet
 }
 
 dependencies {
-    // Hytale API
-    compileOnly 'com.hytale:hytale-api:1.0.0'
+    // Use local HytaleServer.jar - copy from your server installation to libs/
+    compileOnly files('libs/HytaleServer.jar')
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -146,6 +159,17 @@ jar {
     archiveVersion = project.version
 }
 ```
+
+**Getting HytaleServer.jar:**
+```bash
+# Windows
+copy "%APPDATA%\Hytale\install\release\package\game\latest\Server\HytaleServer.jar" libs\
+
+# Linux/macOS
+cp ~/.var/app/com.hypixel.HytaleLauncher/data/Hytale/install/release/package/game/latest/Server/HytaleServer.jar libs/
+```
+
+> **Important**: There is no official Maven repository for the Hytale API yet. You must use the local JAR from your server installation as a `compileOnly` dependency.
 
 **settings.gradle:**
 ```gradle
@@ -357,26 +381,43 @@ Hello, YourName!
 
 ## Development Workflow
 
-### Hot Reload Setup
+### Hot Reload Limitations
 
-Install the HotPluginReload plugin for faster development:
+> "Most developers restart server for testing" - Community consensus from Discord
 
-```bash
-# Copy HotPluginReload to mods
-cp HotPluginReload.jar /path/to/server/mods/
-```
+**Important**: Native hot-reload for plugins is currently broken. The `/plugin reload` command often causes `ZipException` errors. The recommended workflow is:
 
-**Workflow:**
+**Standard Workflow:**
 ```bash
 # 1. Make code changes
 # 2. Build
 ./gradlew build
 
-# 3. Copy to server
+# 3. Stop server
+# (In server console: stop)
+
+# 4. Copy JAR to server
 cp build/libs/MyPlugin-1.0.0.jar /path/to/server/mods/
 
-# 4. HotPluginReload automatically detects and reloads
+# 5. Start server
+cd /path/to/server && java -jar HytaleServer.jar
 ```
+
+### HotSwap for Development
+
+For faster iteration during development, use external HotSwap tools:
+
+1. **DCEVM/JBR** - Enhanced JVM with better hotswap support
+2. **HotSwapAgent** - Plugin for runtime class reloading
+
+```bash
+# Start server with remote debugging
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 \
+     -XX:+AllowEnhancedClassRedefinition \
+     -jar HytaleServer.jar
+```
+
+This allows minor code changes to be applied without full restart (method body changes only).
 
 ### Debugging
 

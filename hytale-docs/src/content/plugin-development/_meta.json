@@ -4,10 +4,15 @@
   "event-system": "Event System",
   "commands": "Commands",
   "ecs-architecture": "ECS Architecture",
+  "thread-safety": "Thread Safety",
   "player-data": "Player Data & Entities",
+  "teleportation": "Player Teleportation",
+  "codecs": "Codecs & Interactions",
   "custom-ui": "Custom UI",
   "configuration": "Configuration",
+  "logging": "Logging",
   "permissions": "Permissions",
+  "permissions-advanced": "Advanced Permissions",
   "lifecycle": "Plugin Lifecycle",
   "examples": "Complete Examples"
 }

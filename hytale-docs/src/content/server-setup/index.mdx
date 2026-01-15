@@ -41,14 +41,111 @@ Key technical details from Discord discussions:
 4. Open port 5520
 5. Start accepting connections
 
+## Server Configuration (config.json)
+
+Based on the decompiled `HytaleServerConfig.java`, here are the key configuration options:
+
+### Basic Settings
+
+```json
+{
+  "serverName": "My Hytale Server",
+  "motd": "Welcome to the server!",
+  "password": "",
+  "maxPlayers": 100,
+  "maxViewRadius": 32
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `serverName` | "Hytale Server" | Display name in server list |
+| `motd` | "" | Message of the day |
+| `password` | "" | Server password (empty = no password) |
+| `maxPlayers` | 100 | Maximum concurrent players |
+| `maxViewRadius` | 32 | Chunk render distance (lower = less RAM) |
+
+### Connection Timeouts
+
+```json
+{
+  "connectionTimeouts": {
+    "initial": "PT10S",
+    "auth": "PT30S",
+    "play": "PT1M"
+  }
+}
+```
+
+| Timeout | Default | Description |
+|---------|---------|-------------|
+| `initial` | 10 seconds | Initial connection timeout |
+| `auth` | 30 seconds | Authentication timeout |
+| `play` | 1 minute | Play session timeout |
+
+### Rate Limiting
+
+```json
+{
+  "rateLimitConfig": {
+    "packetsPerSecond": 2000,
+    "burstCapacity": 500
+  }
+}
+```
+
+### Module Configuration
+
+Disable unused modules for better performance:
+
+```json
+{
+  "modules": {
+    "weather": { "enabled": false },
+    "portals": { "enabled": false },
+    "parkour": { "enabled": false }
+  }
+}
+```
+
+### Mod/Plugin Configuration
+
+Enable or configure specific mods:
+
+```json
+{
+  "modConfig": {
+    "com.example:MyPlugin": {
+      "enabled": true,
+      "requiredVersion": ">=1.0.0"
+    }
+  }
+}
+```
+
+### Authentication Commands
+
+After starting your server, configure authentication:
+
+```bash
+# Use browser-based authentication
+/auth login browser
+
+# Persist credentials (encrypted storage)
+/auth persistence encrypted
+
+# For development only (not secure)
+/auth insecure
+```
+
 ## Sections
 
-- [Installation](/server-setup/installation) - Download and first run
-- [Configuration](/server-setup/configuration) - Server settings
 - [Port Forwarding](/server-setup/port-forwarding) - Network setup
+- [Folder Structure](/server-setup/folder-structure) - Server directory layout
 - [Networking & Transfer Packets](/server-setup/networking) - Multi-server architecture & DDoS protection
 - [Hosting Providers](/server-setup/hosting-providers) - Recommended hosts
-- [Performance Tuning](/server-setup/performance-tuning) - Optimization tips
+- [Performance Optimization](/server-setup/performance-optimization) - JVM tuning, memory management
+- [Multi-Server Architecture](/server-setup/multi-server) - Transfer packets, cross-server setup
 
 ## No Proxy Required
 

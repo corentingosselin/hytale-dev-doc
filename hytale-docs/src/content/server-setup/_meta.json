@@ -6,5 +6,6 @@
   "port-forwarding": "Port Forwarding",
   "networking": "Networking & Transfer Packets",
   "hosting-providers": "Hosting Providers",
-  "performance-tuning": "Performance Tuning"
+  "performance-optimization": "Performance & Memory",
+  "multi-server": "Multi-Server Architecture"
 }
