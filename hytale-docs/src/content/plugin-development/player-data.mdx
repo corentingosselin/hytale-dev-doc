@@ -137,6 +137,17 @@ Player player = server.getPlayer(uuid);
 Collection<Player> players = server.getOnlinePlayers();
 ```
 
+### Account Identity & External Auth
+
+Community notes:
+- No public OAuth flow or username-to-UUID lookup has been shared yet.
+- Usernames can change, so store the UUID for long-term identity.
+
+Common workaround for web apps:
+1. Player logs into your server.
+2. Plugin generates a short-lived code and shows it in-game.
+3. Player enters the code on your website to link their UUID.
+
 ### Player Data
 
 ```java

@@ -199,6 +199,13 @@ These allow you to use a hostname instead of remembering your IP.
 
 > "If you're behind CGNAT (carrier-grade NAT), port forwarding won't work - you'll need a VPS or tunneling service like Playit.gg" - Networking discussion
 
+### CGNAT / ISP-Blocked Ports Workarounds
+
+If you cannot open ports at home:
+- **VPN overlay**: Use WireGuard/Tailscale-style networks with UDP enabled so players can reach your private IP.
+- **UDP reverse proxy**: Use a VPS to accept UDP traffic and forward it to your server (iptables or a QUIC-aware L4 proxy).
+- **Managed hosting**: Skip home hosting with a provider that gives you a public IP.
+
 ## Next Steps
 
 - [Hosting Providers](/server-setup/hosting-providers) - Skip port forwarding with managed hosting

@@ -215,6 +215,14 @@ stream {
 }
 ```
 
+### QUIC + TLS Considerations
+
+Community notes for QUIC-based setups:
+- QUIC runs over UDP, so TCP-only proxies will not help.
+- If you use a domain certificate, clients must connect via the hostname (SNI); connecting by IP can fail hostname validation.
+- Self-signed certs can be verified by fingerprint if you want manual validation.
+- A CA-signed cert only helps if clients actually verify it.
+
 ### Load Balancing
 
 For high-traffic hubs, you may want load balancing:

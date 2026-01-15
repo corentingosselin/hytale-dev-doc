@@ -173,7 +173,7 @@ public class YamlConfig {
 ### 1. Separate Config Files
 
 ```
-plugins/MyPlugin/
+mods/MyPlugin/
 ├── config.yml          # Main plugin config
 ├── warps.yml           # Warp locations
 ├── homes.yml           # Player homes
@@ -243,7 +243,7 @@ public class ReloadCommand extends CommandBase {
 #### SQLite (Lightweight)
 ```java
 // Good for: Small servers, simple data
-String url = "jdbc:sqlite:plugins/MyPlugin/data.db";
+String url = "jdbc:sqlite:mods/MyPlugin/data.db";
 Connection conn = DriverManager.getConnection(url);
 ```
 

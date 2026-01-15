@@ -3,10 +3,23 @@ import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
 
-const banner = <Banner storageKey="hytale-docs-banner">Hytale Development Documentation 🎮</Banner>
+const banner = (
+  <Banner storageKey="hytale-docs-banner">
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+      <img src="/hytale-logo.png" alt="Hytale logo" width="20" height="20" />
+      <span style={{ fontWeight: 600 }}>Community-built docs</span>
+      <span style={{ opacity: 0.85 }}>Open source and updated by the community.</span>
+    </span>
+  </Banner>
+)
 const navbar = (
   <Navbar
-    logo={<b>Hytale Dev Docs</b>}
+    logo={
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <img src="/hytale-logo.png" alt="Hytale logo" width="28" height="28" />
+        <b>Hytale Documentation for devs</b>
+      </span>
+    }
     projectLink="https://github.com/corentingosselin/hytale-dev-doc"
   >
     <a
@@ -38,7 +51,16 @@ export const metadata = {
     template: '%s – Hytale Dev Docs',
     default: 'Hytale Dev Docs'
   },
-  description: 'Community-driven Hytale development documentation'
+  description: 'Community-driven Hytale development documentation',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-96x96.png', type: 'image/png', sizes: '96x96' }
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }]
+  },
+  manifest: '/site.webmanifest'
 }
 
 export default async function RootLayout({ children }) {
