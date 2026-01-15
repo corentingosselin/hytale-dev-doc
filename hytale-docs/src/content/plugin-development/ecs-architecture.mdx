@@ -298,7 +298,7 @@ ECS is designed for multi-threading:
 ```
 
 **Threading Note:**
-> "When a chunk is being ticked, all other chunks within a certain radius are locked" - ShreddedPaper-style approach
+> "When a chunk is being ticked, all other chunks within a certain radius are locked" - Region-locking approach
 
 ### Memory Efficiency
 
@@ -446,9 +446,9 @@ if (player != null && health != null && transform != null) {
 }
 ```
 
-## ECS vs Traditional Minecraft
+## ECS vs Traditional OOP
 
-### Bukkit/Spigot (Traditional)
+### Traditional OOP (Event-Driven)
 
 ```java
 Player player = event.getPlayer();

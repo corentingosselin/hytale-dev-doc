@@ -43,10 +43,18 @@ If you're new to Java or plugin development, follow this recommended path:
 ## Quick Start
 
 ```java
-// Example: Basic plugin structure
+// Example: Basic plugin structure (Hytale-style lifecycle)
 public class MyFirstPlugin {
-    public void onEnable() {
+    public void setup() {
+        // Register components, events, commands
+    }
+
+    public void start() {
         System.out.println("My plugin is running!");
+    }
+
+    public void shutdown() {
+        // Cleanup
     }
 }
 ```

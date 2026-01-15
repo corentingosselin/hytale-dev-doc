@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "mcp": "node mcp-server/index.js",
+    "mcp:install": "cd mcp-server && npm install"
   },
   "keywords": [],
   "author": "",

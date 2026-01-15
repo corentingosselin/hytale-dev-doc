@@ -4,7 +4,7 @@ Create server-side plugins for Hytale using Java.
 
 ## Overview
 
-Hytale plugins are written in Java and run on the server. The plugin system is similar to Minecraft's Spigot/Paper but with modern architecture including ECS (Entity Component System) patterns.
+Hytale plugins are written in Java and run on the server. The plugin system uses a modern architecture with ECS (Entity Component System) patterns.
 
 ## Language Support
 
@@ -69,14 +69,18 @@ dependencies {
 ```java
 public class MyPlugin {
 
-    public void onEnable() {
-        // Plugin initialization
-        System.out.println("MyPlugin has been enabled!");
+    public void setup() {
+        // Register components, events, commands
     }
 
-    public void onDisable() {
+    public void start() {
+        // Plugin initialization
+        System.out.println("MyPlugin has started!");
+    }
+
+    public void shutdown() {
         // Cleanup code
-        System.out.println("MyPlugin has been disabled!");
+        System.out.println("MyPlugin has stopped!");
     }
 }
 ```
@@ -201,7 +205,7 @@ From Discord consensus:
 
 ### Before Hytale
 1. Learn Java fundamentals
-2. Practice with Minecraft Spigot/Paper plugins
+2. Practice with small Java plugins or tools (optional)
 3. Study OOP and design patterns
 
 ### For Hytale
@@ -215,9 +219,9 @@ From Discord consensus:
 
 > "Don't rely solely on AI coding tools. Learn the fundamentals first, then use AI to speed up your workflow." - Community advice
 
-> "Spigot/Paper plugin development is great practice for Hytale." - Learning recommendation
+> "Any Java plugin project helps build familiarity with event-driven code." - Learning recommendation
 
-> "The event system is similar to Spigot but with ECS patterns." - Architecture discussion
+> "The event system is event-driven but structured around ECS patterns." - Architecture discussion
 
 ## Next Steps
 
