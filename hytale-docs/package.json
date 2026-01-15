@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next",
-    "build": "next build",
+    "build": "next build && npx pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
     "mcp": "node mcp-server/index.js",
     "mcp:install": "cd mcp-server && npm install"
