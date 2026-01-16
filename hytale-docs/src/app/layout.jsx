@@ -64,9 +64,34 @@ export const metadata = {
 }
 
 export default async function RootLayout({ children }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'HytaleDocs',
+    url: 'https://hytale-docs.com',
+    logo: 'https://hytale-docs.com/hytale-logo.png'
+  }
+
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <Head />
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBZFXC32PV" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-QBZFXC32PV');
+            `
+          }}
+        />
+      </head>
       <body>
         <Layout
           banner={banner}
