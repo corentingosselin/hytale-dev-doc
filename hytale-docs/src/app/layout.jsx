@@ -1,6 +1,7 @@
 import { Banner, Head } from 'nextra/components'
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { getPageMap } from 'nextra/page-map'
+import Script from 'next/script'
 import 'nextra-theme-docs/style.css'
 
 const banner = (
@@ -74,25 +75,25 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <Head />
-      <head>
+      <Head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBZFXC32PV" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-QBZFXC32PV');
-            `
-          }}
-        />
-      </head>
+      </Head>
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-QBZFXC32PV"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-QBZFXC32PV');
+          `}
+        </Script>
         <Layout
           banner={banner}
           navbar={navbar}
