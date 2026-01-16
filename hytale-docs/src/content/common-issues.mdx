@@ -69,6 +69,7 @@ Troubleshooting guide based on real problems and solutions from the Hytale devel
 - Wait for Hytale authentication services to come back online
 - Check Hytale status page or Discord for service updates
 - Use `/auth insecure` for LAN testing only (not recommended for public servers)
+- The game will now automatically switch to offline mode if authentication fails (as of January 2026 hotfix)
 
 ## Thread & Component Errors
 
@@ -393,13 +394,14 @@ Device authorization request failed
 
 ### Player Token/Authentication Issues
 
-**Problem**: Players get kicked or can't join due to token issues.
+**Problem**: Players get kicked or can't join due to token issues, including "invalid token" errors.
 
 **Solutions**:
 
 1. **Clock Sync Issue**: Player's PC clock may be wrong
    - Have player check and update their system time
-   - This has fixed issues for multiple community members
+   - The launcher now warns players if their computer time is out of date
+   - This has been a common cause of authentication failures and was addressed in the [January 2026 hotfixes](/hotfixes)
 
 2. **Token Refresh**: Try having the player:
    - Close the game completely
